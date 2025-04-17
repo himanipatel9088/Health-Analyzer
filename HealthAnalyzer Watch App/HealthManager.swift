@@ -147,16 +147,18 @@ class HealthManager: ObservableObject {
             }
             
             print("Found \(samples.count) ECG samples")
+            // Convert ECG samples to ECGSampleWithSymptoms with proper symptom analysis
+            let processedSamples = samples.map { sample in
+                let (symptoms, reportedSymptoms) = self?.getSymptomsFromECG(sample) ?? ([], [])
+                return ECGSampleWithSymptoms(
+                    sample: sample,
+                    symptoms: symptoms,
+                    reportedSymptoms: reportedSymptoms
+                )
+            }
+            
             DispatchQueue.main.async {
-                // Convert ECG samples to ECGSampleWithSymptoms with proper symptom analysis
-                self?.ecgSamplesWithSymptoms = samples.map { sample in
-                    let (symptoms, reportedSymptoms) = self?.getSymptomsFromECG(sample) ?? ([], [])
-                    return ECGSampleWithSymptoms(
-                        sample: sample,
-                        symptoms: symptoms,
-                        reportedSymptoms: reportedSymptoms
-                    )
-                }
+                self?.ecgSamplesWithSymptoms = processedSamples
                 self?.errorMessage = nil
             }
         }
